@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Block by Class Name</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Block by Class Name</h1>
+        <p class="subtitle">屏蔽指定网址上的指定元素</p>
+      </header>
+
+      <!-- 空白提示 -->
+      <div id="empty-state" class="empty-state hidden">
+        <p>还没有规则，点击下方按钮添加第一条规则 👇</p>
+      </div>
+
+      <!-- 规则列表 -->
+      <div id="rule-list" class="rule-list"></div>
+
+      <!-- 添加规则按钮 -->
+      <button id="add-rule-btn" class="btn btn-primary">+ 添加规则</button>
+
+      <!-- 规则编辑表单（默认隐藏） -->
+      <div id="editor" class="editor hidden">
+        <div class="editor-card">
+          <div class="field">
+            <label for="rule-url">网址规则</label>
+            <input
+              type="text"
+              id="rule-url"
+              placeholder="例如: *.example.com 或 example.com/*"
+            />
+            <p class="hint">
+              支持通配符 <code>*</code>，不写通配符则按“包含匹配”
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="rule-selectors">屏蔽元素（className / id）</label>
+            <input
+              type="text"
+              id="rule-selectors"
+              placeholder="例如: .ad-banner, #popup, ad-container"
+            />
+            <p class="hint">
+              逗号分隔。不带 <code>.</code> 或 <code>#</code> 的名称会同时匹配
+              class 和 id
+            </p>
+          </div>
+
+          <div class="field">
+            <label class="checkbox-label">
+              <input type="checkbox" id="rule-enabled" checked />
+              启用此规则
+            </label>
+          </div>
+
+          <div class="actions">
+            <button id="save-btn" class="btn btn-primary">保存</button>
+            <button id="cancel-btn" class="btn">取消</button>
+            <span id="save-msg" class="save-msg"></span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>修改规则后，已打开的页面会自动生效。</p>
+      </footer>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

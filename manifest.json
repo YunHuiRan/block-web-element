@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Block by Class Name",
+  "version": "1.0.0",
+  "description": "手动设置生效的网址规则和要屏蔽元素的 className / id，自动隐藏匹配的页面元素",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage", "activeTab"],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Block by Class Name",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}
