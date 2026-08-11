@@ -10,6 +10,7 @@ const addRuleBtn = document.getElementById("add-rule-btn");
 const editor = document.getElementById("editor");
 const ruleUrl = document.getElementById("rule-url");
 const ruleSelectors = document.getElementById("rule-selectors");
+const ruleCssSelectors = document.getElementById("rule-css-selectors");
 const ruleEnabled = document.getElementById("rule-enabled");
 const saveBtn = document.getElementById("save-btn");
 const cancelBtn = document.getElementById("cancel-btn");
@@ -61,7 +62,10 @@ function renderRules() {
 
     const selEl = document.createElement("div");
     selEl.className = "rule-selectors";
-    selEl.textContent = rule.selectors || "(未填写选择器)";
+    const selectorText =
+      (rule.selectors ? rule.selectors + " " : "") + (rule.cssSelectors || "");
+    selEl.textContent = selectorText.trim() || "(未填写选择器)";
+    selEl.title = selectorText.trim();
 
     info.appendChild(urlEl);
     info.appendChild(selEl);
@@ -123,6 +127,7 @@ function openEditor(id = null) {
     // 新增
     ruleUrl.value = "";
     ruleSelectors.value = "";
+    ruleCssSelectors.value = "";
     ruleEnabled.checked = true;
     editor.classList.remove("hidden");
     ruleUrl.focus();
@@ -134,6 +139,7 @@ function openEditor(id = null) {
 
   ruleUrl.value = rule.urlPattern || "";
   ruleSelectors.value = rule.selectors || "";
+  ruleCssSelectors.value = rule.cssSelectors || "";
   ruleEnabled.checked = !!rule.enabled;
   editor.classList.remove("hidden");
   ruleUrl.focus();
@@ -150,13 +156,14 @@ function closeEditor() {
 async function handleSave() {
   const urlPattern = ruleUrl.value.trim();
   const selectors = ruleSelectors.value.trim();
+  const cssSelectors = ruleCssSelectors.value.trim();
 
   // 校验
   if (!urlPattern) {
     showSaveMessage("请填写网址规则", "error");
     return;
   }
-  if (!selectors) {
+  if (!selectors && !cssSelectors) {
     showSaveMessage("请填写要屏蔽的元素", "error");
     return;
   }
@@ -167,6 +174,7 @@ async function handleSave() {
       id: makeId(),
       urlPattern,
       selectors,
+      cssSelectors,
       enabled: ruleEnabled.checked,
     });
   } else {
@@ -175,6 +183,7 @@ async function handleSave() {
     if (rule) {
       rule.urlPattern = urlPattern;
       rule.selectors = selectors;
+      rule.cssSelectors = cssSelectors;
       rule.enabled = ruleEnabled.checked;
     }
   }

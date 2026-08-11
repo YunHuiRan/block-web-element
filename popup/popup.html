@@ -52,6 +52,20 @@
           </div>
 
           <div class="field">
+            <label for="rule-css-selectors">自定义 CSS 选择器（可选）</label>
+            <textarea
+              id="rule-css-selectors"
+              rows="3"
+              placeholder="例如:&#10;a[target=\"_blank\"][href=\"#\"]&#10;div[data-ad] > a[href*=\"click\"]"
+            ></textarea>
+            <p class="hint">
+              支持完整的 CSS 选择器，用于屏蔽没有 class / id
+              的具体元素。<br />每行一个或逗号分隔，如
+              <code>a[target="_blank"][href="#"]</code>
+            </p>
+          </div>
+
+          <div class="field">
             <label class="checkbox-label">
               <input type="checkbox" id="rule-enabled" checked />
               启用此规则

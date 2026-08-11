@@ -64,6 +64,32 @@ function buildSelectors(raw) {
 }
 
 /**
+ * 解析用户输入的自定义 CSS 选择器（原样使用，不做转换）。
+ * 例如:
+ *   a[target="_blank"][href="#"]  -> ['a[target="_blank"][href="#"]']
+ * 支持逗号或换行分隔多个选择器。
+ */
+function parseCssSelectors(raw) {
+  if (!raw) return [];
+  return raw
+    .split(/[\n,]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * 获取一条规则对应的所有 CSS 选择器
+ * （className / id 转换结果 + 自定义 CSS 选择器）。
+ */
+function getRuleSelectors(rule) {
+  const selectors = buildSelectors(rule.selectors);
+  for (const s of parseCssSelectors(rule.cssSelectors)) {
+    if (!selectors.includes(s)) selectors.push(s);
+  }
+  return selectors;
+}
+
+/**
  * 隐藏匹配的元素。
  * 使用 CSS 优先级最高的内联样式并添加标记，防止后续被页面样式覆盖。
  */
@@ -99,8 +125,7 @@ function applyRules(rules) {
   const matching = getMatchingRules(rules);
   let total = 0;
   for (const rule of matching) {
-    const selectors = buildSelectors(rule.selectors);
-    total += hideElements(selectors);
+    total += hideElements(getRuleSelectors(rule));
   }
   return total;
 }
@@ -111,7 +136,7 @@ function startObserver(selectorsList) {
   const allSelectors = [];
   for (const rule of selectorsList) {
     if (!rule.enabled) continue;
-    const selectors = buildSelectors(rule.selectors);
+    const selectors = getRuleSelectors(rule);
     for (const s of selectors) {
       if (!allSelectors.includes(s)) allSelectors.push(s);
     }
