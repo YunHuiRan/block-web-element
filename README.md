@@ -1,5 +1,7 @@
 # Block Web Element
 
+[English](README.en.md) | 简体中文
+
 一个简单实用的 Chrome 扩展：**手动设置生效的网址规则** 和 **想要屏蔽的元素**，打开匹配的网页时自动隐藏这些元素。
 
 ## 功能特性
@@ -20,7 +22,7 @@
 1. 打开 Chrome，在地址栏输入 `chrome://extensions/` 并回车
 2. 打开右上角的 **「开发者模式」** 开关
 3. 点击左上角的 **「加载已解压的扩展程序」**
-4. 选择本项目目录（`block-by-class-name`）
+4. 选择本项目目录（`block-web-element`）
 
 ### 2. 使用方式
 
@@ -142,6 +144,8 @@
 
 ```
 block-web-element/
+├── README.md              # 中文说明（本文件）
+├── README.en.md           # English readme
 ├── manifest.json          # 扩展清单（Manifest V3，文案走 __MSG__）
 ├── content.js             # 内容脚本：读取规则、匹配 URL、隐藏 / 恢复元素
 ├── popup/
