@@ -12,6 +12,7 @@ A small, practical Chrome extension: **set the URL rules that should apply** and
 - 🔄 **Dynamic elements**: a MutationObserver keeps hiding matching elements that appear later
 - 🏷️ **Multiple rules**: the level-1 menu lists URLs only; click a URL to open the level-2 menu and add elements; every rule can be enabled / disabled / deleted on its own
 - 🎚️ **Drawer + per-element switches**: the drawer button on a URL card expands the blocked elements of that URL (stacked vertically) and every element has its own switch; turning one off makes that element **visible again immediately** (no need to delete the rule or re-type anything)
+- 📝 **Comments on elements**: give any blocked element a short note (e.g. “top banner ad”) and add / edit / delete it any time with `📝`; a comment is only a reminder for you — it **never affects blocking** — and it is saved and exported together with the rule
 - 💾 **JSON config export / import**: export all rules to a JSON file in one click and import them back (merged by `id`: existing rules are updated, new ones appended, nothing gets deleted)
 - 📱 **SPA friendly**: rules are re-applied after route changes (Vue / React single-page apps)
 
@@ -33,8 +34,8 @@ A small, practical Chrome extension: **set the URL rules that should apply** and
    - **Element to block**: e.g. `.Advert` (class), `#popup` (id) or a full CSS selector such as `div[data-ad] > a`; class / id must start with `.` / `#`, one element per save
 4. Click **“Save”**
 5. Reload the target page (or simply edit a rule — it applies immediately) to see the result
-6. The **level-1 menu lists URLs only**. Click the drawer button (`▸ / ▾ + count`) to expand the blocked elements of that URL: each element can be toggled on its own (turning it off restores it on the page) or removed with `✕`
-7. Click a URL to open the **level-2 menu (editor)**: the URL is pre-filled and editable, the element input is empty (blocked elements are never listed there) — “Save” **appends** the new element to that URL (existing elements stay). A URL change alone can be saved too. “Back” returns to the URL list
+6. The **level-1 menu lists URLs only**. Click the drawer button (`▸ / ▾ + count`) to expand the blocked elements of that URL: each element can be toggled on its own (turning it off restores it on the page), removed with `✕`, or given a comment with `📝`
+7. Click a URL to open the **level-2 menu (editor)**: the URL is pre-filled and editable, the element input is empty (blocked elements are never listed there) — “Save” **appends** the new element to that URL (existing elements stay) and the optional **“Comment”** you type is stored on that new element. A URL change alone can be saved too. “Back” returns to the URL list
 8. Click **“Export”** at the bottom of the level-1 menu to download all rules as a JSON file (the file name contains the export time)
 9. Click **“Import”** and pick a JSON file: rules with the same `id` are updated, the rest are appended, and the result is reported as “Imported: X added, Y updated”
 
@@ -80,12 +81,15 @@ The “Element to block” input accepts both class / id and full CSS selectors:
 **Drawer (blocked elements)** — every blocked element of that URL is **stacked vertically**, one row per element:
 
 - **Small switch**: blocks or unblocks that single element; turning it off restores the element on the page immediately
-- **`✕`**: removes the element from the block list
+- **`📝`**: adds / edits the comment of that element — an inline input appears below the row (`✓` save, `✕` cancel, plus `🗑️` to delete an existing comment; Enter saves and Esc cancels). The comment is shown under the element and the button is highlighted when one exists
+- **`✕`**: removes the element from the block list (its comment is deleted with it)
 
 **Level-2 menu (editor)** — opened by clicking a URL or “+ Add rule”. The element input is always empty and blocked elements are never shown (they live in the drawer). Clicking “Save”:
 
 - while adding a rule: creates a new rule (enabled by default) and needs a URL rule plus one element
 - while editing an existing URL: **the URL is pre-filled and editable** (clearing it shows “Please fill in the URL rule”); a filled element is **appended** to that URL (existing elements stay, already-blocked ones are skipped); a URL change alone can be saved as well; with no changes at all you get “Nothing to save”
+
+The optional **“Comment”** field is a note for the element you are adding: leave it empty for no comment, fill it in and it is stored on the element added by this save (comments of existing elements are edited with `📝` in the drawer).
 
 Validation rules for the single element input:
 
@@ -120,6 +124,7 @@ Exported file format:
       "selectors": ".ad-banner, #popup",
       "cssSelectors": "div[data-ad] > a",
       "disabledTargets": ["s:.ad-banner"],
+      "targetNotes": { "s:#popup": "popup ad" },
       "enabled": true
     }
   ]
@@ -134,6 +139,8 @@ Import behaviour:
 | rule `id` is new                              | **appended** as a new rule                            |
 | the file is a bare array `[{...}, {...}]`     | supported as well (same as `{ "rules": [...] }`)      |
 | `enabled` / `disabledTargets` / `id` missing  | defaults: `true` / `[]` / a generated id              |
+| `targetNotes` missing                         | default `{}` (no element has a comment)               |
+| comments inside `targetNotes`                  | only comments of elements that still exist are kept; they are trimmed, cut to 100 characters, and empty / non-string values are ignored |
 | `url` is used instead of `urlPattern`         | still recognised as the URL rule                      |
 | an entry has neither URL nor element          | that entry is ignored                                 |
 | the file is not valid JSON, or has no usable rule | error message, existing rules are **left untouched** |
@@ -189,6 +196,7 @@ chrome.storage.local.get("blockRules", (r) => console.log(r));
 - The element input supports both class / id and CSS selectors: class / id must start with `.` or `#`, anything else must be a valid CSS selector, and only one element is added per save (the popup validates the prefix, the count and the selector). For legacy data the content script still accepts entries without a prefix
 - Entries are routed by syntax: `.` / `#` go to `rule.selectors`, other CSS selectors to `rule.cssSelectors`; both are parsed as CSS selectors in the page
 - Every element has its own switch state; disabled elements are stored in `rule.disabledTargets` (e.g. `s:.ad-banner`, `c:a[href]`) and skipped by the content script. When an element is unblocked its original inline `display` is restored, so switches can be flipped back and forth freely
+- Element comments live in `rule.targetNotes` (same keys as `disabledTargets`, e.g. `{ "s:#popup": "popup ad" }`). They are pure notes and never take part in blocking, so the content script does not read them at all; they are added / edited / deleted through the inline editor in the drawer, and removing an element with `✕` drops its comment too
 - The level-2 menu only appends: new entries are de-duplicated and merged into `rule.selectors` / `rule.cssSelectors`, existing elements are never overwritten, and new elements are blocked by default
 - The URL is pre-filled and editable in the level-2 menu; saving updates `rule.urlPattern` (changing the URL does not touch the blocked elements or their switch states)
 - Whether a rule applies depends only on `rule.enabled` (the level-2 menu no longer has an “enable this rule” checkbox); new rules are enabled by default
@@ -219,7 +227,13 @@ A: Open the drawer of that URL — every blocked element is listed with its own 
 A: Click the URL to open the level-2 menu (the inputs are empty and existing elements are not listed), fill in the element and click “Save” — it is appended. Elements that are already blocked are skipped automatically.
 
 **Q: How do I remove a blocked element for good?**
-A: Open the drawer of the URL and click `✕` next to the element. If you only want to stop blocking it temporarily, use its switch instead (the page restores it automatically).
+A: Open the drawer of the URL and click `✕` next to the element (its comment is deleted with it). If you only want to stop blocking it temporarily, use its switch instead (the page restores it automatically).
+
+**Q: How do I add or change a comment on a blocked element?**
+A: Open the drawer of the URL and click `📝` next to the element — an inline input appears below: click `✓` (or press Enter) to save, `✕` (or Esc) to discard. An existing comment is pre-filled, and `🗑️` deletes it. A comment is only for yourself and **never affects blocking**; it is saved and exported together with the rule. When adding an element in the level-2 menu you can also type a comment into the optional “Comment” field right away.
+
+**Q: Are comments shown on the page, or do they affect blocking?**
+A: Neither. Comments only live in the extension config (the rule’s `targetNotes` field), are shown only in the popup drawer, are never injected into the page and never take part in selector matching.
 
 **Q: How do I change the URL of a rule?**
 A: Click the URL in the level-1 menu — the URL input is pre-filled, edit it and click “Save” (saving a URL change alone is fine; blocked elements and their switch states are untouched).
@@ -237,4 +251,4 @@ A: No rule is ever deleted: imported rules whose `id` already exists update that
 A: It follows Chrome’s UI language (Simplified Chinese `zh_CN` and English `en` are bundled). To add another language, copy `_locales/en/messages.json` to the matching locale folder (e.g. `_locales/ja/messages.json`) and translate the values, keeping the keys unchanged.
 
 **Q: Can I write the config file by hand and import it?**
-A: Yes. Use either the full export format or a bare array such as `[{ "urlPattern": "example.com", "selectors": ".ad-banner" }]`; `enabled`, `disabledTargets` and `id` are optional (defaults: `true`, `[]`, a generated id) and `url` is an alias of `urlPattern`.
+A: Yes. Use either the full export format or a bare array such as `[{ "urlPattern": "example.com", "selectors": ".ad-banner" }]`; `enabled`, `disabledTargets`, `targetNotes` and `id` are optional (defaults: `true`, `[]`, `{}`, a generated id) and `url` is an alias of `urlPattern`.

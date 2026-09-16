@@ -85,24 +85,77 @@ body {
   padding-top: 8px;
 }
 
+/* 每个元素一行：主行（选择器 / 注释 + 按钮 + 开关）+ 可展开的注释编辑区 */
 .target-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
   padding: 4px 6px;
   border-radius: 6px;
   background: #f8f9fb;
 }
 
-.target-label {
+.target-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 选择器 + 注释：注释另起一行显示 */
+.target-text {
+  display: flex;
   flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.target-label {
   min-width: 0;
   font-size: 12px;
   color: #2d3436;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 元素注释（备注，不参与屏蔽） */
+.target-note {
+  min-width: 0;
+  font-size: 11px;
+  color: #636e72;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 添加 / 修改注释的按钮：已有注释时高亮 */
+.btn-note.has-note {
+  color: #0984e3;
+  border-color: #74b9ff;
+}
+
+/* 行内注释编辑区：输入框 + 保存 / 取消（+ 删除） */
+.target-note-editor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.note-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid #dfe6e9;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #2d3436;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.note-input:focus {
+  border-color: #0984e3;
 }
 
 .target-empty {
@@ -127,6 +180,10 @@ body {
 .target-disabled .target-label {
   color: #b2bec3;
   text-decoration: line-through;
+}
+
+.target-disabled .target-note {
+  color: #b2bec3;
 }
 
 .rule-actions {

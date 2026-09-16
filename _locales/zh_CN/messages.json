@@ -16,6 +16,11 @@
   "hintElement": {
     "message": "class / id 必须带 .（class）或 #（id）前缀，如 .ad-banner、#popup；也支持完整 CSS 选择器，如 div[data-ad] > a；每次只能填一个元素"
   },
+  "labelNote": { "message": "注释（可选）" },
+  "placeholderNote": { "message": "例如: 页面顶部广告（可选）" },
+  "hintNote": {
+    "message": "可选，仅作备注方便区分元素，不影响屏蔽效果；留空表示不给该元素添加注释"
+  },
   "save": { "message": "保存" },
   "back": { "message": "返回" },
   "saved": { "message": "已保存 ✅" },
@@ -26,6 +31,12 @@
   "ruleSwitchTitle": { "message": "启停整条规则" },
   "targetSwitchTitle": { "message": "是否屏蔽该元素" },
   "removeTarget": { "message": "从屏蔽列表中移除该元素" },
+  "addNote": { "message": "给这个元素添加注释" },
+  "editNote": { "message": "修改 / 删除这个元素的注释" },
+  "notePlaceholder": { "message": "输入注释（留空则删除注释）" },
+  "noteSave": { "message": "保存注释" },
+  "noteCancel": { "message": "取消" },
+  "removeNote": { "message": "删除注释" },
   "deleteRule": { "message": "删除" },
   "deleteRuleConfirm": { "message": "确定删除规则「$1」？" },
   "sourceClassId": { "message": "class / id" },

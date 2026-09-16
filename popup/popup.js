@@ -13,10 +13,16 @@ const ruleSelectors = $("rule-selectors");
 const saveMsg = $("save-msg");
 const ioMsg = $("io-msg");
 const importFile = $("import-file");
+const ruleNote = $("rule-note");
+
+/** 注释最大长度（与 popup.html 输入框的 maxlength 保持一致） */
+const NOTE_MAX_LENGTH = 100;
 
 let rules = [];
 let editingId = null;
 const expandedRuleIds = new Set();
+/** 正在编辑注释的元素行（`ruleId|targetKey`，同一时间只编辑一个） */
+let editingNoteKey = null;
 
 /** 多语言文案 */
 const msg = (key, subs) => chrome.i18n.getMessage(key, subs) || key;
@@ -76,6 +82,23 @@ function setTargetDisabled(rule, target, disabled) {
   else keys.delete(targetKey(target));
   rule.disabledTargets = [...keys];
 }
+
+/** 元素的注释存在 rule.targetNotes 里：{ 's:.ad-banner': '顶部广告' } */
+const getTargetNote = (rule, target) =>
+  (rule.targetNotes || {})[targetKey(target)] || "";
+
+/** 写入 / 清空某个元素的注释（传空字符串即删除该元素的注释） */
+function setTargetNote(rule, target, note) {
+  const notes = { ...(rule.targetNotes || {}) };
+  const key = targetKey(target);
+  if (note) notes[key] = note;
+  else delete notes[key];
+  rule.targetNotes = notes;
+}
+
+/** 注释编辑区的标识：同一条规则下的同一个元素 */
+const noteEditKey = (rule, target) => `${rule.id}|${targetKey(target)}`;
+
 /** 开关组件 */
 function createSwitch({ checked, small = false, title = "", onChange }) {
   const wrap = document.createElement("label");
@@ -94,12 +117,21 @@ function createSwitch({ checked, small = false, title = "", onChange }) {
   return wrap;
 }
 
-/** 抽屉中的一行：元素文本 + 独立开关 + 移除按钮 */
+/** 抽屉中的一行：元素文本（含注释）+ 注释按钮 + 独立开关 + 移除按钮 */
 function createTargetItem(rule, target) {
   const off = isTargetOff(rule, target);
+  const note = getTargetNote(rule, target);
+  const editKey = noteEditKey(rule, target);
+  const editingNote = editingNoteKey === editKey;
 
   const row = document.createElement("div");
   row.className = "target-item" + (off ? " target-disabled" : "");
+
+  const main = document.createElement("div");
+  main.className = "target-main";
+
+  const text = document.createElement("div");
+  text.className = "target-text";
 
   const label = document.createElement("span");
   label.className = "target-label";
@@ -107,6 +139,24 @@ function createTargetItem(rule, target) {
   label.title =
     `${msg(target.kind === "c" ? "sourceCss" : "sourceClassId")}：` +
     target.value;
+  text.append(label);
+
+  if (note) {
+    const noteEl = document.createElement("span");
+    noteEl.className = "target-note";
+    noteEl.textContent = note;
+    noteEl.title = note;
+    text.append(noteEl);
+  }
+
+  const noteBtn = document.createElement("button");
+  noteBtn.className = "btn-icon btn-note" + (note ? " has-note" : "");
+  noteBtn.textContent = "📝";
+  noteBtn.title = msg(note ? "editNote" : "addNote");
+  noteBtn.addEventListener("click", () => {
+    editingNoteKey = editingNote ? null : editKey;
+    renderRules();
+  });
 
   const removeBtn = document.createElement("button");
   removeBtn.className = "btn-icon btn-remove";
@@ -114,8 +164,9 @@ function createTargetItem(rule, target) {
   removeBtn.title = msg("removeTarget");
   removeBtn.addEventListener("click", () => removeTarget(rule, target));
 
-  row.append(
-    label,
+  main.append(
+    text,
+    noteBtn,
     createSwitch({
       checked: !off,
       small: true,
@@ -128,7 +179,73 @@ function createTargetItem(rule, target) {
     }),
     removeBtn,
   );
+
+  row.append(main);
+  if (editingNote) row.append(createNoteEditor(rule, target, note));
   return row;
+}
+
+/** 行内注释编辑区：输入框 + 保存 / 取消（已有注释时还能直接删除） */
+function createNoteEditor(rule, target, note) {
+  const box = document.createElement("div");
+  box.className = "target-note-editor";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "note-input";
+  input.value = note;
+  input.maxLength = NOTE_MAX_LENGTH;
+  input.placeholder = msg("notePlaceholder");
+  input.addEventListener("keydown", (e) => {
+    e.stopPropagation(); // 不要触发弹窗级的「回车 = 保存规则」
+    if (e.key === "Enter") {
+      e.preventDefault();
+      saveTargetNote(rule, target, input.value);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeNoteEditor();
+    }
+  });
+
+  const saveBtn = document.createElement("button");
+  saveBtn.className = "btn-icon";
+  saveBtn.textContent = "✓";
+  saveBtn.title = msg("noteSave");
+  saveBtn.addEventListener("click", () =>
+    saveTargetNote(rule, target, input.value),
+  );
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "btn-icon";
+  cancelBtn.textContent = "✕";
+  cancelBtn.title = msg("noteCancel");
+  cancelBtn.addEventListener("click", closeNoteEditor);
+
+  box.append(input, saveBtn, cancelBtn);
+
+  if (note) {
+    const clearBtn = document.createElement("button");
+    clearBtn.className = "btn-icon danger";
+    clearBtn.textContent = "🗑️";
+    clearBtn.title = msg("removeNote");
+    clearBtn.addEventListener("click", () => saveTargetNote(rule, target, ""));
+    box.append(clearBtn);
+  }
+  return box;
+}
+
+/** 关闭注释编辑区（不保存改动） */
+function closeNoteEditor() {
+  editingNoteKey = null;
+  renderRules();
+}
+
+/** 保存某个元素的注释（传空字符串即删除注释） */
+async function saveTargetNote(rule, target, value) {
+  setTargetNote(rule, target, value.trim().slice(0, NOTE_MAX_LENGTH));
+  editingNoteKey = null;
+  await saveRules();
+  renderRules();
 }
 
 /** 一条规则卡片：网址 + 操作 + 抽屉内容 */
@@ -165,6 +282,7 @@ function createRuleItem(rule, index) {
   delBtn.addEventListener("click", async () => {
     if (!confirm(msg("deleteRuleConfirm", [rule.urlPattern]))) return;
     expandedRuleIds.delete(rule.id);
+    if (editingNoteKey?.startsWith(`${rule.id}|`)) editingNoteKey = null;
     rules.splice(index, 1);
     await saveRules();
     renderRules();
@@ -208,6 +326,8 @@ function createRuleItem(rule, index) {
 /** 渲染一级菜单（每条规则一行网址） */
 function renderRules() {
   ruleList.replaceChildren(...rules.map(createRuleItem));
+  // 注释编辑区打开时保持焦点（重渲染后输入框是新节点）
+  if (editingNoteKey) ruleList.querySelector(".note-input")?.focus();
 }
 // ----- 二级菜单（新增 / 编辑） -----
 
@@ -216,6 +336,7 @@ function openEditor(id = null) {
   editingId = id;
   saveMsg.textContent = "";
   ruleSelectors.value = "";
+  ruleNote.value = "";
   urlField.classList.remove("hidden");
 
   if (id === null) {
@@ -240,8 +361,10 @@ function closeEditor() {
   saveMsg.textContent = "";
 }
 
-/** 从屏蔽列表移除一个元素（连同它的开关记录） */
+/** 从屏蔽列表移除一个元素（连同它的开关记录与注释） */
 async function removeTarget(rule, target) {
+  if (editingNoteKey === noteEditKey(rule, target)) editingNoteKey = null;
+
   const field = targetField(target);
   rule[field] = splitList(rule[field])
     .filter((value) => value !== target.value)
@@ -251,6 +374,7 @@ async function removeTarget(rule, target) {
   rule.disabledTargets = (rule.disabledTargets || []).filter((key) =>
     keys.has(key),
   );
+  setTargetNote(rule, target, "");
 
   await saveRules();
   renderRules();
@@ -275,7 +399,7 @@ function validateElement(value) {
   return isValidSelector(value) ? null : msg("errInvalidSelector");
 }
 
-/** 保存：新增规则，或修改网址 + 追加一个元素 */
+/** 保存：新增规则，或修改网址 + 追加一个元素（可同时给新元素填注释） */
 async function handleSave() {
   const value = ruleSelectors.value.trim();
   const inputError = validateElement(value);
@@ -283,6 +407,9 @@ async function handleSave() {
 
   const urlPattern = ruleUrl.value.trim();
   if (!urlPattern) return flash(saveMsg, msg("errUrlRequired"), true);
+
+  // 注释是可选项：只作用于本次追加的那个元素
+  const note = ruleNote.value.trim().slice(0, NOTE_MAX_LENGTH);
 
   if (editingId === null) {
     if (!value) return flash(saveMsg, msg("errElementRequired"), true);
@@ -293,9 +420,18 @@ async function handleSave() {
       selectors: "",
       cssSelectors: "",
       disabledTargets: [],
+      targetNotes: {},
       enabled: true,
     };
-    rule[fieldOfValue(value)] = value;
+    const field = fieldOfValue(value);
+    rule[field] = value;
+    if (note) {
+      setTargetNote(
+        rule,
+        { kind: field === "selectors" ? "s" : "c", value },
+        note,
+      );
+    }
     rules.push(rule);
     expandedRuleIds.add(rule.id);
   } else {
@@ -310,14 +446,12 @@ async function handleSave() {
     if (urlChanged) rule.urlPattern = urlPattern;
     if (value) {
       const field = fieldOfValue(value);
+      const target = { kind: field === "selectors" ? "s" : "c", value };
       rule[field] = splitList(rule[field])
         .concat(value)
         .join(field === "selectors" ? ", " : "\n");
-      setTargetDisabled(
-        rule,
-        { kind: field === "selectors" ? "s" : "c", value },
-        false,
-      );
+      setTargetDisabled(rule, target, false);
+      if (note) setTargetNote(rule, target, note);
     }
     expandedRuleIds.add(rule.id);
   }
@@ -374,6 +508,20 @@ function exportConfig() {
   flash(ioMsg, msg("exported", [String(rules.length)]));
 }
 
+/** 规范化 targetNotes：只保留仍存在的元素、非空且长度合法的注释 */
+function normalizeTargetNotes(raw, rule) {
+  const notes = {};
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return notes;
+
+  const keys = new Set(getRuleTargets(rule).map(targetKey));
+  for (const [key, value] of Object.entries(raw)) {
+    if (!keys.has(key) || typeof value !== "string") continue;
+    const note = value.trim().slice(0, NOTE_MAX_LENGTH);
+    if (note) notes[key] = note;
+  }
+  return notes;
+}
+
 /** 规范化导入的一条规则，无效条目返回 null */
 function normalizeImportedRule(raw) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
@@ -392,6 +540,7 @@ function normalizeImportedRule(raw) {
     disabledTargets: Array.isArray(raw.disabledTargets)
       ? raw.disabledTargets.filter((key) => typeof key === "string")
       : [],
+    targetNotes: normalizeTargetNotes(raw.targetNotes, { selectors, cssSelectors }),
     enabled: raw.enabled === undefined ? true : !!raw.enabled,
   };
 }

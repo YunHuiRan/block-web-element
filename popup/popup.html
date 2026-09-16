@@ -54,6 +54,20 @@
             </p>
           </div>
 
+          <div class="field">
+            <label for="rule-note" data-i18n="labelNote">注释（可选）</label>
+            <input
+              type="text"
+              id="rule-note"
+              maxlength="100"
+              data-i18n-placeholder="placeholderNote"
+              placeholder="例如: 页面顶部广告（可选）"
+            />
+            <p class="hint" data-i18n="hintNote">
+              可选，仅作备注方便区分元素，不影响屏蔽效果；留空表示不给该元素添加注释
+            </p>
+          </div>
+
           <div class="actions">
             <button id="save-btn" class="btn btn-primary" data-i18n="save">保存</button>
             <button id="cancel-btn" class="btn" data-i18n="back">返回</button>

@@ -16,6 +16,11 @@
   "hintElement": {
     "message": "Class / id must start with . (class) or # (id), e.g. .ad-banner, #popup. Full CSS selectors work too, e.g. div[data-ad] > a. One element per save"
   },
+  "labelNote": { "message": "Comment (optional)" },
+  "placeholderNote": { "message": "e.g. top banner ad (optional)" },
+  "hintNote": {
+    "message": "Optional. Only a note to tell elements apart, it does not affect blocking. Leave it empty to add no comment"
+  },
   "save": { "message": "Save" },
   "back": { "message": "Back" },
   "saved": { "message": "Saved ✅" },
@@ -26,6 +31,12 @@
   "ruleSwitchTitle": { "message": "Enable or disable this rule" },
   "targetSwitchTitle": { "message": "Block this element or not" },
   "removeTarget": { "message": "Remove this element from the block list" },
+  "addNote": { "message": "Add a comment to this element" },
+  "editNote": { "message": "Edit / delete the comment of this element" },
+  "notePlaceholder": { "message": "Type a comment (empty removes it)" },
+  "noteSave": { "message": "Save the comment" },
+  "noteCancel": { "message": "Cancel" },
+  "removeNote": { "message": "Delete the comment" },
   "deleteRule": { "message": "Delete" },
   "deleteRuleConfirm": { "message": "Delete the rule \"$1\"?" },
   "sourceClassId": { "message": "class / id" },
