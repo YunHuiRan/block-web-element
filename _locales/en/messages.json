@@ -1,0 +1,47 @@
+{
+  "extName": { "message": "Block Web Elements" },
+  "extDescription": {
+    "message": "Block elements on the sites you choose by .class / #id or CSS selectors; hidden automatically"
+  },
+  "addRule": { "message": "+ Add rule" },
+  "exportConfig": { "message": "Export" },
+  "importConfig": { "message": "Import" },
+  "editorTitleNew": { "message": "New rule" },
+  "editorTitleEdit": { "message": "Edit \"$1\"" },
+  "labelUrl": { "message": "URL rule" },
+  "placeholderUrl": { "message": "e.g. *.example.com or example.com/*" },
+  "hintUrl": { "message": "Wildcards (*) are supported; otherwise the URL must contain the text" },
+  "labelElement": { "message": "Element to block" },
+  "placeholderElement": { "message": "e.g. .ad-banner, #popup, div[data-ad] > a" },
+  "hintElement": {
+    "message": "Class / id must start with . (class) or # (id), e.g. .ad-banner, #popup. Full CSS selectors work too, e.g. div[data-ad] > a. One element per save"
+  },
+  "save": { "message": "Save" },
+  "back": { "message": "Back" },
+  "saved": { "message": "Saved ✅" },
+  "noUrl": { "message": "(no URL)" },
+  "noTargets": { "message": "(no blocked element yet)" },
+  "editUrlTitle": { "message": "Click to edit the blocked elements of this URL" },
+  "drawerTitle": { "message": "Show / hide blocked elements" },
+  "ruleSwitchTitle": { "message": "Enable or disable this rule" },
+  "targetSwitchTitle": { "message": "Block this element or not" },
+  "removeTarget": { "message": "Remove this element from the block list" },
+  "deleteRule": { "message": "Delete" },
+  "deleteRuleConfirm": { "message": "Delete the rule \"$1\"?" },
+  "sourceClassId": { "message": "class / id" },
+  "sourceCss": { "message": "CSS selector" },
+  "errUrlRequired": { "message": "Please fill in the URL rule" },
+  "errElementRequired": { "message": "Please fill in the element to block" },
+  "errNoChange": { "message": "Nothing to save" },
+  "errDuplicated": { "message": "This element is already blocked" },
+  "errMultiple": { "message": "Only one element can be blocked at a time" },
+  "errNeedPrefix": {
+    "message": "Start with . (class) or # (id), or use a full CSS selector"
+  },
+  "errInvalidSelector": { "message": "Not a valid CSS selector" },
+  "exported": { "message": "Exported $1 rule(s)" },
+  "imported": { "message": "Imported: $1 added, $2 updated" },
+  "importInvalidJson": { "message": "Import failed: not a valid JSON file" },
+  "importNoRules": { "message": "Import failed: no usable rule in the file" },
+  "warnInvalidSelector": { "message": "[Block Web Elements] Invalid selector: " }
+}

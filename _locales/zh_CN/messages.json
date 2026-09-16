@@ -1,0 +1,47 @@
+{
+  "extName": { "message": "Block Web Elements" },
+  "extDescription": {
+    "message": "设置生效的网址规则和要屏蔽的元素（.class / #id 或 CSS 选择器），自动隐藏匹配的页面元素"
+  },
+  "addRule": { "message": "+ 添加规则" },
+  "exportConfig": { "message": "导出配置" },
+  "importConfig": { "message": "导入配置" },
+  "editorTitleNew": { "message": "新增规则" },
+  "editorTitleEdit": { "message": "编辑「$1」" },
+  "labelUrl": { "message": "网址规则" },
+  "placeholderUrl": { "message": "例如: *.example.com 或 example.com/*" },
+  "hintUrl": { "message": "支持通配符 *，不写通配符则按“包含匹配”" },
+  "labelElement": { "message": "屏蔽元素" },
+  "placeholderElement": { "message": "例如: .ad-banner、#popup、div[data-ad] > a" },
+  "hintElement": {
+    "message": "class / id 必须带 .（class）或 #（id）前缀，如 .ad-banner、#popup；也支持完整 CSS 选择器，如 div[data-ad] > a；每次只能填一个元素"
+  },
+  "save": { "message": "保存" },
+  "back": { "message": "返回" },
+  "saved": { "message": "已保存 ✅" },
+  "noUrl": { "message": "(未填写网址)" },
+  "noTargets": { "message": "(还没有屏蔽任何元素)" },
+  "editUrlTitle": { "message": "点击编辑该网址的屏蔽元素" },
+  "drawerTitle": { "message": "显示 / 隐藏已屏蔽的元素" },
+  "ruleSwitchTitle": { "message": "启停整条规则" },
+  "targetSwitchTitle": { "message": "是否屏蔽该元素" },
+  "removeTarget": { "message": "从屏蔽列表中移除该元素" },
+  "deleteRule": { "message": "删除" },
+  "deleteRuleConfirm": { "message": "确定删除规则「$1」？" },
+  "sourceClassId": { "message": "class / id" },
+  "sourceCss": { "message": "CSS 选择器" },
+  "errUrlRequired": { "message": "请填写网址规则" },
+  "errElementRequired": { "message": "请填写要屏蔽的元素" },
+  "errNoChange": { "message": "没有需要保存的修改" },
+  "errDuplicated": { "message": "该元素已经屏蔽过了" },
+  "errMultiple": { "message": "每次只能屏蔽一个元素，请只填一个元素" },
+  "errNeedPrefix": {
+    "message": "请以「.」(class) 或「#」(id) 开头，或填写完整的 CSS 选择器"
+  },
+  "errInvalidSelector": { "message": "不是合法的 CSS 选择器" },
+  "exported": { "message": "已导出 $1 条规则" },
+  "imported": { "message": "导入成功：新增 $1 条，更新 $2 条" },
+  "importInvalidJson": { "message": "导入失败：不是合法的 JSON 文件" },
+  "importNoRules": { "message": "导入失败：文件里没有可用的规则" },
+  "warnInvalidSelector": { "message": "[Block Web Elements] 无效选择器：" }
+}
